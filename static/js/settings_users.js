@@ -128,7 +128,7 @@ function populate_users(realm_people_data) {
     let active_users = [];
     let deactivated_users = [];
     let bots = [];
-    _.each(realm_people_data.members, function (user) {
+    for (const user of realm_people_data.members) {
         user.is_active_human = user.is_active && !user.is_bot;
         if (user.is_bot) {
             // Convert bot type id to string for viewing to the users.
@@ -148,7 +148,7 @@ function populate_users(realm_people_data) {
         } else {
             deactivated_users.push(user);
         }
-    });
+    }
 
     active_users = _.sortBy(active_users, 'full_name');
     deactivated_users = _.sortBy(deactivated_users, 'full_name');
@@ -371,7 +371,7 @@ exports.on_load_success = function (realm_people_data) {
 
         const button_elem = $(e.target);
         const row = button_elem.closest(".user_row");
-        const bot_id = row.attr("data-user-id");
+        const bot_id = parseInt(row.attr("data-user-id"), 10);
         const url = '/json/bots/' + encodeURIComponent(bot_id);
 
         const opts = {
@@ -393,7 +393,7 @@ exports.on_load_success = function (realm_people_data) {
         // Go up the tree until we find the user row, then grab the email element
         const button_elem = $(e.target);
         const row = button_elem.closest(".user_row");
-        const user_id = row.attr("data-user-id");
+        const user_id = parseInt(row.attr("data-user-id"), 10);
         const url = '/json/users/' + encodeURIComponent(user_id) + "/reactivate";
         const data = {};
         const status = get_status_field();
@@ -467,11 +467,11 @@ exports.on_load_success = function (realm_people_data) {
                     }
                 });
                 // Append user type field values also
-                _.each(fields_user_pills, function (field_pills, field_id) {
+                fields_user_pills.each(function (field_pills, field_id) {
                     if (field_pills) {
                         const user_ids = user_pill.get_user_ids(field_pills);
                         new_profile_data.push({
-                            id: parseInt(field_id, 10),
+                            id: field_id,
                             value: user_ids,
                         });
                     }

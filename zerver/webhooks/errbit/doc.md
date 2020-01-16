@@ -1,4 +1,4 @@
-Get Zulip notifications for your Errbit bug tracker!
+Get Zulip notifications for the Errbit error tracker!
 
 1. {!create-stream.md!}
 

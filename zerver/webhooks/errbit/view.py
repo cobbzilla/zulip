@@ -1,4 +1,3 @@
-# Webhooks for external integrations.
 from typing import Any, Dict
 
 from django.http import HttpRequest, HttpResponse

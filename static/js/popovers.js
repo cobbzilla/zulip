@@ -387,7 +387,7 @@ function show_user_group_info_popover(element, group, message) {
         const args = {
             group_name: group.name,
             group_description: group.description,
-            members: sort_group_members(fetch_group_members(group.members.keys())),
+            members: sort_group_members(fetch_group_members([...group.members])),
         };
         elt.popover({
             placement: calculate_info_popover_placement(popover_size, elt),
@@ -589,8 +589,8 @@ exports.open_message_menu = function (message) {
         return true;
     }
 
-    const id = message.id;
-    exports.toggle_actions_popover($(".selected_message .actions_hover")[0], id);
+    const message_id = message.id;
+    exports.toggle_actions_popover($(".selected_message .actions_hover")[0], message_id);
     if (current_actions_popover_elem) {
         focus_first_action_popover_item();
     }
@@ -720,19 +720,19 @@ exports.register_click_handlers = function () {
     });
 
     $("#main_div").on("click", ".user-mention", function (e) {
-        const id = $(this).attr('data-user-id');
+        const id_string = $(this).attr('data-user-id');
         // We fallback to email to handle legacy markdown that was rendered
         // before we cut over to using data-user-id
         const email = $(this).attr('data-user-email');
-        if (id === '*' || email === '*') {
+        if (id_string === '*' || email === '*') {
             return;
         }
         const row = $(this).closest(".message_row");
         e.stopPropagation();
         const message = current_msg_list.get(rows.id(row));
         let user;
-        if (id) {
-            const user_id = parseInt(id, 10);
+        if (id_string) {
+            const user_id = parseInt(id_string, 10);
             user = people.get_person_from_user_id(user_id);
         } else {
             user = people.get_by_email(email);
@@ -741,11 +741,11 @@ exports.register_click_handlers = function () {
     });
 
     $("#main_div").on("click", ".user-group-mention", function (e) {
-        const id = $(this).attr('data-user-group-id');
+        const user_group_id = parseInt($(this).attr('data-user-group-id'), 10);
         const row = $(this).closest(".message_row");
         e.stopPropagation();
         const message = current_msg_list.get(rows.id(row));
-        const group = user_groups.get_user_group_from_id(id, true);
+        const group = user_groups.get_user_group_from_id(user_group_id, true);
         if (group === undefined) {
             // This user group has likely been deleted.
             blueslip.info('Unable to find user group in message' + message.sender_id);
@@ -928,8 +928,8 @@ exports.register_click_handlers = function () {
     });
 
     function reminder_click_handler(datestr, e) {
-        const id = $(".remind.custom").data('message-id');
-        reminder.do_set_reminder_for_message(id, datestr);
+        const message_id = $(".remind.custom").data('message-id');
+        reminder.do_set_reminder_for_message(message_id, datestr);
         exports.hide_all();
         e.stopPropagation();
         e.preventDefault();
@@ -1020,7 +1020,7 @@ exports.register_click_handlers = function () {
     });
 
     $('body').on('click', '.popover_mute_topic', function (e) {
-        const stream_id = $(e.currentTarget).attr('data-msg-stream-id');
+        const stream_id = parseInt($(e.currentTarget).attr('data-msg-stream-id'), 10);
         const topic = $(e.currentTarget).attr('data-msg-topic');
 
         exports.hide_actions_popover();
@@ -1030,7 +1030,7 @@ exports.register_click_handlers = function () {
     });
 
     $('body').on('click', '.popover_unmute_topic', function (e) {
-        const stream_id = $(e.currentTarget).attr('data-msg-stream-id');
+        const stream_id = parseInt($(e.currentTarget).attr('data-msg-stream-id'), 10);
         const topic = $(e.currentTarget).attr('data-msg-topic');
 
         exports.hide_actions_popover();
@@ -1051,8 +1051,8 @@ exports.register_click_handlers = function () {
 
     $('body').on('click', '.copy_link', function (e) {
         exports.hide_actions_popover();
-        const id = $(this).attr("data-message-id");
-        const row = $("[zid='" + id + "']");
+        const message_id = $(this).attr("data-message-id");
+        const row = $("[zid='" + message_id + "']");
         row.find(".alert-msg")
             .text(i18n.t("Copied!"))
             .css("display", "block")
